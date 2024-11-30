@@ -1,0 +1,8 @@
+:root {
+  --zindex-header: 1000;
+  --zindex-ddmenu: 1050;
+  --zindex-menu: 1150;
+  --zindex-popup: 1500;
+  --zindex-modal: 2000;
+  --zindex-backdrop: 1500;
+}
