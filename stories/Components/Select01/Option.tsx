@@ -39,15 +39,19 @@ const Option = ({
   });
 
   React.useEffect(() => {
+    if (!label || !value) return;
     let isSelected = false;
     if (value == context.value) isSelected = true;
     setState((old) => ({ ...old, isSelected }));
   }, [context, value]);
 
   React.useEffect(() => {
+    if (!label || !value) return;
     if (onChange) onChange(state);
   }, [state, onChange]);
 
+  if (!label || !value) return null;
+  
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.button) return;
