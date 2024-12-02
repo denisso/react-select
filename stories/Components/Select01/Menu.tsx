@@ -24,17 +24,31 @@ const Menu = ({
   // onOpen,
   emptyValue,
   portal = false,
-  // manualOpenClose = false,
-}: Props) => {
+}: // manualOpenClose = false,
+Props) => {
   const context = useContext();
   const [attrs, setAttrs] = React.useState<React.HTMLAttributes<HTMLElement>>({
     ...aria,
   });
+  const refMenu = React.useRef<HTMLDivElement>(null);
+  
+  const handleClickOutside = (event: MouseEvent) => {
+    if (refMenu.current && !refMenu.current.contains(event.target as Node)) {
+      context.setOpen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!context.open) return;
     if (!(context.refBox.current instanceof HTMLElement)) {
-      console.log("Menu: refBox not valid");
+      throw Error("Target element not valid");
     }
 
     const $target = context.refBox.current;
@@ -63,9 +77,15 @@ const Menu = ({
   }, [context]);
   context.refEmptyOption.current = emptyValue;
   if (!context.open) return null;
-  if (!portal) return <div className={className}>{children}</div>;
+  if (!portal)
+    return (
+      <div className={className} ref={refMenu}>
+        {children}
+      </div>
+    );
   return (
     <Portal
+      ref={refMenu}
       className={classNames(className, context.open ? styles?.open : "")}
       type="dropdown"
       attrs={attrs}

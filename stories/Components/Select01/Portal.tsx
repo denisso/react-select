@@ -11,23 +11,29 @@ export type PortalProps = {
   children: React.ReactNode;
 };
 
-const Portal = ({ className, children, type, attrs }: PortalProps) => {
-  const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+const Portal = React.forwardRef(
+  (
+    { className, children, type, attrs }: PortalProps,
+    ref: React.ForwardedRef<HTMLDivElement>
+  ) => {
+    const [isMounted, setIsMounted] = React.useState(false);
+    React.useEffect(() => {
+      setIsMounted(true);
+    }, []);
 
-  if (!isMounted) return null;
-  return ReactDom.createPortal(
-    <div
-      {...attrs}
-      className={classNames(styles.portal, styles[type], className)}
-    >
-      {children}
-    </div>,
-    document.body
-  );
-};
+    if (!isMounted) return null;
+    return ReactDom.createPortal(
+      <div
+        {...attrs}
+        ref={ref}
+        className={classNames(styles.portal, styles[type], className)}
+      >
+        {children}
+      </div>,
+      document.body
+    );
+  }
+);
 
 Portal.displayName = "Portal";
 
