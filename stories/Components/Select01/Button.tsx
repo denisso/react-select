@@ -21,13 +21,13 @@ export const ButtonLabel = ({ handleLabel }: ButtonLabel) => {
         context.label,
         setLabel,
         context.value,
-        context.refPlaceholder.current
+        context.placeholderRef.current
       );
     }
 
     setLabel(
-      !context.value || context.refEmptyOption.current == context.value
-        ? context.refPlaceholder.current
+      !context.value || context.emptyOptionRef.current == context.value
+        ? context.placeholderRef.current
         : context.label
     );
   }, [context, handleLabel]);
@@ -50,28 +50,22 @@ type Props = {
 const Button = ({ placeholder, className, children, box, styles }: Props) => {
   const context = useContext();
 
-  if (placeholder) context.refPlaceholder.current = placeholder;
+  if (placeholder) context.placeholderRef.current = placeholder;
   return (
     <button
       className={classNames(className, context.open ? styles?.open : "")}
-      onClick={context.onClickButton}
+      onClick={() => context.setOpen((prev) => !prev)}
       ref={(ref) => {
-        if (box) context.refBox.current = box;
-        else if (ref) context.refBox.current = ref;
+        if (box) context.boxRef.current = box;
+        else if (ref) context.boxRef.current = ref;
       }}
-      onFocus={() => {
-        context.refFocus.current = true;
-        context.setFocus(true);
-      }}
-      onBlur={() => {
-        context.refFocus.current = false;
-        context.setFocus(false);
-      }}
+      onFocus={() => context.setFocus(true)}
+      onBlur={() => context.setFocus(false)}
     >
       {children
         ? children
-        : !context.value || context.refEmptyOption.current == context.value
-        ? context.refPlaceholder.current
+        : !context.value || context.emptyOptionRef.current == context.value
+        ? context.placeholderRef.current
         : context.label}
     </button>
   );

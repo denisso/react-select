@@ -1,4 +1,5 @@
 import React from "react";
+import type { MethodsObserver } from "../ParamsManager";
 
 export type OptionType = {
   label: string;
@@ -16,12 +17,10 @@ interface IContext {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   focus: boolean;
   setFocus: React.Dispatch<React.SetStateAction<boolean>>;
-  refBox: React.MutableRefObject<HTMLElement | null>;
-  refFocus: React.MutableRefObject<boolean>;
-  refPlaceholder: React.MutableRefObject<string>;
-  refEmptyOption: React.MutableRefObject<IDType>;
-  onClickButton: () => void;
-  onMouseDownOption: (value: IDType, label: string) => void;
+  boxRef: React.MutableRefObject<HTMLElement | null>;
+  placeholderRef: React.MutableRefObject<string>;
+  emptyOptionRef: React.MutableRefObject<IDType>;
+  methodsRef: React.MutableRefObject<MethodsObserver>;
 }
 
 export default React.createContext<IContext | undefined>(undefined);

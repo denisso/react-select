@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import Select01 from "./Select01-Portal";
+import Select01 from "./Select01-ParamsManager";
 
 const meta: Meta<typeof Select01> = {
-  title: "Examples/Select01- Portal",
+  title: "Examples/Select01 - ParamsManager",
   component: Select01,
   parameters: {
     layout: "centered",
@@ -43,12 +43,18 @@ export const Default: Story = {
       source: {
         code: `
 const CustomButton = () => {
+  const onChange = (id: IDType) => {
+    console.log(id);
+  };
   return (
-    <Button
-      placeholder="placeholder"
-      className={styles.button}
-      styles={{ open: styles.open }}
-    />
+    <>
+      <Button
+        placeholder="placeholder"
+        className={styles.button}
+        styles={{ open: styles.open }}
+      />
+      <ParamsManager onChange={onChange} />
+    </>
   );
 };
 
@@ -61,10 +67,13 @@ type Props = {
   options: OptionType[];
 };
 
-const CustomSelect = ({ options }: Props) => {
+const CustomMenu = ({ options }: Props) => {
+  const onChange = (id: IDType) => {
+    console.log(id);
+  };
   return (
-    <Select className={styles.select}>
-      <CustomButton />
+    <>
+      <ParamsManager onChange={onChange} />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}
@@ -86,18 +95,21 @@ const CustomSelect = ({ options }: Props) => {
           />
         ))}
       </Menu>
+    </>
+  );
+};
+
+const CustomSelect = ({ options }: Props) => {
+  return (
+    <Select className={styles.select}>
+      <CustomButton />
+      <CustomMenu options={options} />
     </Select>
   );
 };
-// Usage
-<CustomSelect
-  options={[
-    { label: 'Option 1', value: 'value1' },
-    { label: 'Option 2', value: 'value2' },
-  ]}
-/>
 
-  `,
+export default CustomSelect;
+`,
       },
     },
   },

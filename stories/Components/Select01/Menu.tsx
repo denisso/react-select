@@ -31,7 +31,7 @@ Props) => {
     ...aria,
   });
   const refMenu = React.useRef<HTMLDivElement>(null);
-  
+
   const handleClickOutside = (event: MouseEvent) => {
     if (refMenu.current && !refMenu.current.contains(event.target as Node)) {
       context.setOpen(false);
@@ -47,11 +47,11 @@ Props) => {
 
   React.useEffect(() => {
     if (!context.open) return;
-    if (!(context.refBox.current instanceof HTMLElement)) {
+    if (!(context.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
     }
 
-    const $target = context.refBox.current;
+    const $target = context.boxRef.current;
 
     const updateBox = throttle(() => {
       if (!open || !($target instanceof HTMLElement)) return;
@@ -75,7 +75,7 @@ Props) => {
       delHandler("scroll", updateBox);
     };
   }, [context]);
-  context.refEmptyOption.current = emptyValue;
+  context.emptyOptionRef.current = emptyValue;
   if (!context.open) return null;
   if (!portal)
     return (

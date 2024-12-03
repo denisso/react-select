@@ -1,6 +1,6 @@
 import React from "react";
 import useContext from "./Context/useContext";
-import { IDType } from "./Context/Context";
+import { IDType } from "./Context";
 import classNames from "classnames";
 
 type Styles = Partial<{
@@ -32,7 +32,7 @@ const Option = ({
   styles,
   children,
 }: Props) => {
-  const context = useContext();
+  const c = useContext();
   const [state, setState] = React.useState<State>({
     isSelected: false,
     isHovered: false,
@@ -41,9 +41,9 @@ const Option = ({
   React.useEffect(() => {
     if (!label || !value) return;
     let isSelected = false;
-    if (value == context.value) isSelected = true;
+    if (value == c.value) isSelected = true;
     setState((old) => ({ ...old, isSelected }));
-  }, [context, value]);
+  }, [c, value]);
 
   React.useEffect(() => {
     if (!label || !value) return;
@@ -51,11 +51,16 @@ const Option = ({
   }, [state, onChange]);
 
   if (!label || !value) return null;
-  
+
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    // handle onle left mouse
     if (e.button) return;
-    context.onMouseDownOption(value, label);
+    c.setValue(value);
+    c.methodsRef.current.notify("onChange", value);
+    c.setOpen(false);
+    c.methodsRef.current.notify("onOpen", false);
+    c.setLabel(label);
   };
 
   const onOver = () => setState((old) => ({ ...old, isHovered: true }));
@@ -65,7 +70,7 @@ const Option = ({
     <div
       {...attrs}
       role="option"
-      aria-selected={value == context.value}
+      aria-selected={value == c.value}
       className={classNames(
         className,
         state.isSelected ? styles?.selected : "",
