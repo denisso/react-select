@@ -44,7 +44,7 @@ export const Default: Story = {
         code: `
 const CustomButton = () => {
   const onChange = (id: IDType) => {
-    console.log(id);
+    console.log("CustomButton", id);
   };
   return (
     <>
@@ -69,7 +69,7 @@ type Props = {
 
 const CustomMenu = ({ options }: Props) => {
   const onChange = (id: IDType) => {
-    console.log(id);
+    console.log("CustomMenu", id);
   };
   return (
     <>
