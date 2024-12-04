@@ -17,7 +17,8 @@ interface IContext {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   focus: boolean;
   setFocus: React.Dispatch<React.SetStateAction<boolean>>;
-  boxRef: React.MutableRefObject<HTMLElement | null>;
+  boxRef: React.RefObject<HTMLDivElement>;
+  controlRef: React.MutableRefObject<HTMLElement | null>;
   placeholderRef: React.MutableRefObject<string>;
   emptyOptionRef: React.MutableRefObject<IDType>;
   methodsRef: React.MutableRefObject<MethodsObserver>;

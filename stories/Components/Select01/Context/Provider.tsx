@@ -11,12 +11,11 @@ function ContextProvider({ children }: ContextProviderProps) {
   const [label, setLabel] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [focus, setFocus] = React.useState(false);
-  const boxRef = React.useRef<HTMLElement | null>(null);
+  const boxRef = React.useRef<HTMLDivElement>(null);
   const placeholderRef = React.useRef("");
   const emptyOptionRef = React.useRef("");
   const methodsRef = React.useRef(new MethodsObserver());
-
-
+  const controlRef= React.useRef<HTMLElement | null>(null);
   return (
     <Context.Provider
       value={{
@@ -32,6 +31,7 @@ function ContextProvider({ children }: ContextProviderProps) {
         boxRef,
         emptyOptionRef,
         methodsRef,
+        controlRef
       }}
     >
       {children}

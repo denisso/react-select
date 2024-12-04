@@ -6,6 +6,20 @@
 
 import React from "react";
 import ContextProvider from "./Context/Provider";
+import useContext from "./Context/useContext";
+
+type BoxProps = {
+  className?: string;
+  children: React.ReactNode;
+};
+const Box = ({ className, children }: BoxProps) => {
+  const c = useContext();
+  return (
+    <div className={className} ref={c.boxRef}>
+      {children}
+    </div>
+  );
+};
 
 type Props = {
   children: React.ReactNode;
@@ -14,9 +28,9 @@ type Props = {
 
 const Select = ({ children, className }: Props) => {
   return (
-    <div className={className}>
-      <ContextProvider>{children}</ContextProvider>
-    </div>
+    <ContextProvider>
+      <Box className={className}>{children} </Box>
+    </ContextProvider>
   );
 };
 

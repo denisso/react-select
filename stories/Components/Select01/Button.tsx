@@ -13,24 +13,24 @@ type ButtonLabel = {
 
 export const ButtonLabel = ({ handleLabel }: ButtonLabel) => {
   const [label, setLabel] = React.useState("");
-  const context = useContext();
+  const c = useContext();
 
   React.useEffect(() => {
     if (handleLabel) {
       return handleLabel(
-        context.label,
+        c.label,
         setLabel,
-        context.value,
-        context.placeholderRef.current
+        c.value,
+        c.placeholderRef.current
       );
     }
 
     setLabel(
-      !context.value || context.emptyOptionRef.current == context.value
-        ? context.placeholderRef.current
-        : context.label
+      !c.value || c.emptyOptionRef.current == c.value
+        ? c.placeholderRef.current
+        : c.label
     );
-  }, [context, handleLabel]);
+  }, [c, handleLabel]);
   return <>{label}</>;
 };
 
@@ -48,25 +48,25 @@ type Props = {
 };
 
 const Button = ({ placeholder, className, children, box, styles }: Props) => {
-  const context = useContext();
+  const c = useContext();
 
-  if (placeholder) context.placeholderRef.current = placeholder;
+  if (placeholder) c.placeholderRef.current = placeholder;
   return (
     <button
-      className={classNames(className, context.open ? styles?.open : "")}
-      onClick={() => context.setOpen((prev) => !prev)}
+      className={classNames(className, c.open ? styles?.open : "")}
+      onClick={() => c.setOpen((prev) => !prev)}
       ref={(ref) => {
-        if (box) context.boxRef.current = box;
-        else if (ref) context.boxRef.current = ref;
+        if (box) c.controlRef.current = box;
+        else if (ref) c.controlRef.current = ref;
       }}
-      onFocus={() => context.setFocus(true)}
-      onBlur={() => context.setFocus(false)}
+      onFocus={() => c.setFocus(true)}
+      onBlur={() => c.setFocus(false)}
     >
       {children
         ? children
-        : !context.value || context.emptyOptionRef.current == context.value
-        ? context.placeholderRef.current
-        : context.label}
+        : !c.value || c.emptyOptionRef.current == c.value
+        ? c.placeholderRef.current
+        : c.label}
     </button>
   );
 };

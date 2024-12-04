@@ -5,11 +5,32 @@ import throttle from "../utils/throttle";
 import { addHandler, delHandler } from "../utils/posChange";
 import classNames from "classnames";
 
+const updateBox = throttle<
+  (
+    target: HTMLElement,
+    setAttrs: React.Dispatch<
+      React.SetStateAction<React.HTMLAttributes<HTMLElement>>
+    >
+  ) => void
+>((target, setAttrs) => {
+  if (!open || !(target instanceof HTMLElement)) return;
+  const rect = target.getBoundingClientRect();
+
+  setAttrs({
+    style: {
+      top: rect.top + rect.height + "px",
+      left: rect.left + "px",
+      width: rect.width + "px",
+    },
+    ...aria,
+  });
+}, 100);
+
 type Props = {
   className: string;
   children: React.ReactNode;
   emptyValue: string;
-  styles?: { open: string };
+  styles?: Partial<{ open: string; portal: string }>;
   onOpen?: (focus: boolean) => void;
   manualOpenClose?: boolean;
   portal?: boolean;
@@ -21,20 +42,23 @@ const Menu = ({
   className,
   children,
   styles,
-  // onOpen,
   emptyValue,
   portal = false,
-}: // manualOpenClose = false,
-Props) => {
-  const context = useContext();
+}: Props) => {
+  const c = useContext();
   const [attrs, setAttrs] = React.useState<React.HTMLAttributes<HTMLElement>>({
     ...aria,
   });
   const refMenu = React.useRef<HTMLDivElement>(null);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (refMenu.current && !refMenu.current.contains(event.target as Node)) {
-      context.setOpen(false);
+    if (
+      refMenu.current &&
+      c.boxRef.current &&
+      !refMenu.current.contains(event.target as Node) &&
+      !c.boxRef.current.contains(event.target as Node)
+    ) {
+      c.setOpen(false);
     }
   };
 
@@ -46,37 +70,24 @@ Props) => {
   }, []);
 
   React.useEffect(() => {
-    if (!context.open) return;
-    if (!(context.boxRef.current instanceof HTMLElement)) {
+    if (!c.open || !portal) return;
+    if (!(c.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
     }
 
-    const $target = context.boxRef.current;
+    const $target = c.boxRef.current;
 
-    const updateBox = throttle(() => {
-      if (!open || !($target instanceof HTMLElement)) return;
-      const rect = $target.getBoundingClientRect();
-
-      setAttrs({
-        style: {
-          top: rect.top + rect.height + "px",
-          left: rect.left + "px",
-          width: rect.width + "px",
-        },
-        ...aria,
-      });
-    }, 100);
-
-    updateBox();
-    addHandler("resize", updateBox);
-    addHandler("scroll", updateBox);
+    updateBox($target, setAttrs);
+    const h = () => updateBox($target, setAttrs);
+    addHandler("resize", h);
+    addHandler("scroll", h);
     return () => {
-      delHandler("resize", updateBox);
-      delHandler("scroll", updateBox);
+      delHandler("resize", h);
+      delHandler("scroll", h);
     };
-  }, [context]);
-  context.emptyOptionRef.current = emptyValue;
-  if (!context.open) return null;
+  }, [c]);
+  c.emptyOptionRef.current = emptyValue;
+  if (!c.open) return null;
   if (!portal)
     return (
       <div className={className} ref={refMenu}>
@@ -86,7 +97,7 @@ Props) => {
   return (
     <Portal
       ref={refMenu}
-      className={classNames(className, context.open ? styles?.open : "")}
+      className={classNames(className, c.open ? styles?.open : "")}
       type="dropdown"
       attrs={attrs}
     >

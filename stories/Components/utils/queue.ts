@@ -23,7 +23,7 @@ class Queue<T> {
       return null;
     }
     const value = this.queue[this.head];
-    this.queue[this.head] = null; // Пометка для избежания утечек памяти
+    this.queue[this.head] = null;
     this.head++;
 
     if (this.head >= this.compactThreshold) {
