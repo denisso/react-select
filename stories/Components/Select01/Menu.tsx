@@ -4,6 +4,7 @@ import Portal from "./Portal";
 import throttle from "../utils/throttle";
 import { addHandler, delHandler } from "../utils/posChange";
 import classNames from "classnames";
+import css from "./Menu.module.css";
 
 const updateBox = throttle<
   (
@@ -49,13 +50,13 @@ const Menu = ({
   const [attrs, setAttrs] = React.useState<React.HTMLAttributes<HTMLElement>>({
     ...aria,
   });
-  const refMenu = React.useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
-      refMenu.current &&
+      menuRef.current &&
       c.boxRef.current &&
-      !refMenu.current.contains(event.target as Node) &&
+      !menuRef.current.contains(event.target as Node) &&
       !c.boxRef.current.contains(event.target as Node)
     ) {
       c.setOpen(false);
@@ -90,18 +91,23 @@ const Menu = ({
   if (!c.open) return null;
   if (!portal)
     return (
-      <div className={className} ref={refMenu}>
+      <div className={className} ref={menuRef}>
         {children}
       </div>
     );
   return (
-    <Portal
-      ref={refMenu}
-      className={classNames(className, c.open ? styles?.open : "")}
-      type="dropdown"
-      attrs={attrs}
-    >
-      {children}
+    <Portal>
+      <div
+        {...attrs}
+        ref={menuRef}
+        className={classNames(
+          css.portal,
+          c.open ? styles?.open : "",
+          className
+        )}
+      >
+        {children}
+      </div>
     </Portal>
   );
 };
