@@ -1,4 +1,4 @@
-class Queue<T> {
+class SWAPTwoWayQueue<T> {
   private queue: (T | null)[];
   private head: number;
   private tail: number;
@@ -10,14 +10,21 @@ class Queue<T> {
     this.tail = 0;
     this.compactThreshold = 1000;
   }
-
+  /**
+   * push element to end queue
+   * @param value
+   * @returns T
+   */
   enqueue(value: T): number {
     this.queue[this.tail] = value;
     const indx = this.tail;
     this.tail++;
     return indx;
   }
-
+  /**
+   * get element from front queue
+   * @returns
+   */
   dequeue(): T | null {
     if (this.isEmpty()) {
       return null;
@@ -29,6 +36,18 @@ class Queue<T> {
     if (this.head >= this.compactThreshold) {
       this.compact();
     }
+    return value;
+  }
+  /**
+   *
+   */
+  pop() {
+    if (this.isEmpty()) {
+      return null;
+    }
+    this.tail--;
+    const value = this.queue[this.tail];
+    this.queue[this.tail] = null;
     return value;
   }
   /**
@@ -48,11 +67,11 @@ class Queue<T> {
    * @param index
    * @returns
    */
-  swapByIndex(index: number): T | null {
+  removeAndswapByIndex(index: number): T | null {
     if (this.isEmpty() || index < this.head || index >= this.tail) return null;
-    if (index === this.head) return this.dequeue();
+    if (index === this.tail) return this.pop();
     const value = this.queue[index];
-    this.queue[index] = this.dequeue();
+    this.queue[index] = this.pop();
     return value;
   }
 
@@ -68,7 +87,10 @@ class Queue<T> {
   }
 
   isEmpty(): boolean {
-    return this.head === this.tail;
+    if (this.head !== this.tail) return false;
+    this.head = 0;
+    this.tail = 0;
+    return true;
   }
 
   size(): number {
@@ -90,20 +112,5 @@ class Queue<T> {
     };
   }
 }
-export default Queue;
-export type QueueType = typeof Queue;
-// Usage example
-// const queue = new Queue<number>();
-// queue.enqueue(1);
-// queue.enqueue(2);
-// queue.enqueue(3);
-// queue.extractByIndex(1);
-
-// for (
-//   let iterator = queue[Symbol.iterator](), result = iterator.next();
-//   !result.done;
-//   result = iterator.next()
-// ) {
-//   console.log(result.value);
-//   result = iterator.next();
-// }
+export default SWAPTwoWayQueue;
+export type QueueType = typeof SWAPTwoWayQueue;

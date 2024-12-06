@@ -15,7 +15,7 @@ class MethodsObserver {
     const firstObs = this.observers.peek();
     if (!firstObs) return;
     firstObs.indx.current = indx;
-    this.observers.swapByIndex(indx);
+    this.observers.removeAndswapByIndex(indx);
   }
   notify<M extends keyof Methods>(
     method: M,
