@@ -2,13 +2,11 @@ class SWAPTwoWayQueue<T> {
   private queue: (T | null)[];
   private head: number;
   private tail: number;
-  private readonly compactThreshold: number;
 
   constructor() {
     this.queue = [];
     this.head = 0;
     this.tail = 0;
-    this.compactThreshold = 1000;
   }
   /**
    * push element to end queue
@@ -32,10 +30,6 @@ class SWAPTwoWayQueue<T> {
     const value = this.queue[this.head];
     this.queue[this.head] = null;
     this.head++;
-
-    if (this.head >= this.compactThreshold) {
-      this.compact();
-    }
     return value;
   }
   /**
@@ -73,12 +67,6 @@ class SWAPTwoWayQueue<T> {
     const value = this.queue[index];
     this.queue[index] = this.pop();
     return value;
-  }
-
-  private compact(): void {
-    this.queue = this.queue.slice(this.head, this.tail);
-    this.tail = this.tail - this.head;
-    this.head = 0;
   }
 
   peek(): T | null {
