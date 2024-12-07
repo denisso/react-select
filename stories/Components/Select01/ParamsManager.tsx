@@ -3,11 +3,11 @@ import { IDType } from "./Context";
 import useContext from "./Context/useContext";
 import Queue from "../utils/queue";
 
-type QueueType = Methods & { indx: React.MutableRefObject<number> };
+type Observer = Methods & { indx: React.MutableRefObject<number> };
 
 class MethodsObserver {
-  private observers = new Queue<QueueType>();
-  attach(value: QueueType) {
+  private observers = new Queue<Observer>();
+  attach(value: Observer) {
     const indx = value.indx.current;
     return this.observers.update(indx, value);
   }
@@ -39,7 +39,7 @@ export { MethodsObserver };
 export type Methods = Partial<{
   onChange: (id: IDType) => void;
   onFocus: (focus: boolean) => void;
-  onOpen: (focus: boolean) => void;
+  onOpen: (open: boolean) => void;
 }>;
 
 const ParamsManager = ({ onChange, onFocus, onOpen }: Methods) => {

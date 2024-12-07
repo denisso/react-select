@@ -14,11 +14,12 @@ type ButtonLabel = {
 export const ButtonLabel = ({ handleLabel }: ButtonLabel) => {
   const [label, setLabel] = React.useState("");
   const c = useContext();
-
+  React.useEffect(()=>{}, [])
   React.useEffect(() => {
+    const state = c.state.current
     if (handleLabel) {
       return handleLabel(
-        c.label,
+        state.label,
         setLabel,
         c.value,
         c.placeholderRef.current
