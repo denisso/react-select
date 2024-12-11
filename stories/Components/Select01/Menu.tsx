@@ -5,6 +5,7 @@ import throttle from "../utils/throttle";
 import { addHandler, delHandler } from "../utils/posChange";
 import classNames from "classnames";
 import css from "./Menu.module.css";
+import type { State } from "./Context/Provider";
 
 const updateBox = throttle<
   (
@@ -47,6 +48,7 @@ const Menu = ({
   portal = false,
 }: Props) => {
   const c = useContext();
+  const [open, setOpen] = React.useState<State["open"]>("close");
   const [attrs, setAttrs] = React.useState<React.HTMLAttributes<HTMLElement>>({
     ...aria,
   });
@@ -59,7 +61,7 @@ const Menu = ({
       !menuRef.current.contains(event.target as Node) &&
       !c.boxRef.current.contains(event.target as Node)
     ) {
-      c.setOpen(false);
+      c.sm.state().click = "outside";
     }
   };
 
@@ -71,11 +73,22 @@ const Menu = ({
   }, []);
 
   React.useEffect(() => {
-    if (!c.open || !portal) return;
+    if (!portal) return;
     if (!(c.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
     }
+    setOpen(c.sm.state(false).open);
+    const onClick = (click: State["click"]) => {
 
+      if (c.sm.state(false).open === "open") {
+        c.sm.state().open = "close";
+      } else {
+        c.sm.state().open = "open";
+      }
+
+      setOpen(c.sm.state(false).open);
+    };
+    c.sm.attach("click", onClick);
     const $target = c.boxRef.current;
 
     updateBox($target, setAttrs);
@@ -85,10 +98,11 @@ const Menu = ({
     return () => {
       delHandler("resize", h);
       delHandler("scroll", h);
+      c.sm.detach("click", onClick);
     };
   }, [c]);
-  c.emptyOptionRef.current = emptyValue;
-  if (!c.open) return null;
+  c.sm.config.emptyOption = emptyValue;
+  if (!c.sm.state(false).open) return null;
   if (!portal)
     return (
       <div className={className} ref={menuRef}>
@@ -97,17 +111,21 @@ const Menu = ({
     );
   return (
     <Portal>
-      <div
-        {...attrs}
-        ref={menuRef}
-        className={classNames(
-          css.portal,
-          c.open ? styles?.open : "",
-          className
-        )}
-      >
-        {children}
-      </div>
+      {open === "open" ? (
+        <div
+          {...attrs}
+          ref={menuRef}
+          className={classNames(
+            css.portal,
+            open ? styles?.open : "",
+            className
+          )}
+        >
+          {children}
+        </div>
+      ) : (
+        <></>
+      )}
     </Portal>
   );
 };

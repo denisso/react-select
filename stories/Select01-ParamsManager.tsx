@@ -4,11 +4,11 @@ import Option from "./Components/Select01/Option";
 import Button from "./Components/Select01/Button";
 import styles from "./Select01.module.scss";
 import ParamsManager from "./Components/Select01/ParamsManager";
-import { IDType } from "./Components/Select01/Context";
+import { State } from "./Components/Select01/Context/Provider";
 
 const CustomButton = () => {
-  const onChange = (id: IDType) => {
-    console.log("CustomButton", id);
+  const onOpen = (open: State["open"]) => {
+    console.log("CustomButton onOpen", open);
   };
   return (
     <>
@@ -17,7 +17,7 @@ const CustomButton = () => {
         className={styles.button}
         styles={{ open: styles.open }}
       />
-      <ParamsManager onChange={onChange} />
+      <ParamsManager onOpen={onOpen} />
     </>
   );
 };
@@ -32,12 +32,12 @@ type Props = {
 };
 
 const CustomMenu = ({ options }: Props) => {
-  const onChange = (id: IDType) => {
-    console.log("CustomMenu", id);
+  const onOptions = (options: State["options"]) => {
+    console.log("CustomMenu onOptions", options);
   };
   return (
     <>
-      <ParamsManager onChange={onChange} />
+      <ParamsManager onOptions={onOptions} />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}

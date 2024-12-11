@@ -1,27 +1,10 @@
 import React from "react";
-import type { MethodsObserver } from "../ParamsManager";
-
-export type OptionType = {
-  label: string;
-  key: string;
-};
-
-export type IDType = string;
+import type { SM } from "./Provider";
 
 interface IContext {
-  value: IDType;
-  setValue: React.Dispatch<React.SetStateAction<IDType>>;
-  label: string;
-  setLabel: React.Dispatch<React.SetStateAction<string>>;
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  focus: boolean;
-  setFocus: React.Dispatch<React.SetStateAction<boolean>>;
   boxRef: React.RefObject<HTMLDivElement>;
   controlRef: React.MutableRefObject<HTMLElement | null>;
-  placeholderRef: React.MutableRefObject<string>;
-  emptyOptionRef: React.MutableRefObject<IDType>;
-  methodsRef: React.MutableRefObject<MethodsObserver>;
+  sm: SM;
 }
 
 export default React.createContext<IContext | undefined>(undefined);
