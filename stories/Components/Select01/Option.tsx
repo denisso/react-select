@@ -1,6 +1,5 @@
 import React from "react";
 import useContext from "./Context/useContext";
-import { IDType } from "./Context";
 import classNames from "classnames";
 
 type Styles = Partial<{
@@ -9,76 +8,71 @@ type Styles = Partial<{
 }>;
 
 type Props = {
-  value: IDType;
+  value: string;
   label: string;
   className?: string;
-  onChange?: (state: State) => void;
+  onSelect?: (state: boolean, value: string) => void;
+  onHover?: (state: boolean, value: string) => void;
   attrs?: React.HTMLAttributes<HTMLElement>;
   styles?: Styles;
   children?: React.ReactNode;
-};
-
-type State = {
-  isSelected: boolean;
-  isHovered: boolean;
 };
 
 const Option = ({
   label,
   value,
   className,
-  onChange,
+  onSelect,
+  onHover,
   attrs,
   styles,
   children,
 }: Props) => {
   const c = useContext();
-  const [state, setState] = React.useState<State>({
-    isSelected: false,
-    isHovered: false,
-  });
+  const [select, setSelect] = React.useState(false);
+  const [hover, setHover] = React.useState(false);
+  const onSelectRef = React.useRef(onSelect);
+  onSelectRef.current = onSelect;
+  const onHoverRef = React.useRef(onHover);
+  onHoverRef.current = onHover;
 
-  React.useEffect(() => {
-    if (!label || !value) return;
-    let isSelected = false;
-    if (value == c.value) isSelected = true;
-    setState((old) => ({ ...old, isSelected }));
-  }, [c, value]);
-
-  React.useEffect(() => {
-    if (!label || !value) return;
-    if (onChange) onChange(state);
-  }, [state, onChange]);
+  React.useEffect(() => {}, [c]);
 
   if (!label || !value) return null;
-
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     // handle onle left mouse
     if (e.button) return;
-    c.setValue(value);
-    c.methodsRef.current.notify("onChange", value);
-    c.setOpen(false);
-    c.methodsRef.current.notify("onOpen", false);
-    c.setLabel(label);
-  };
 
-  const onOver = () => setState((old) => ({ ...old, isHovered: true }));
-  const onOut = () => setState((old) => ({ ...old, isHovered: false }));
+    if (c.sm.config.multiSelect) {
+      c.sm.state().options.set(value, label);
+      c.sm.state().click = "control";
+    } else {
+      c.sm.state(false).options.clear();
+      c.sm.state().options.set(value, label);
+      c.sm.state().click = "control";
+    }
+  };
 
   return (
     <div
       {...attrs}
       role="option"
-      aria-selected={value == c.value}
+      aria-selected={select}
       className={classNames(
         className,
-        state.isSelected ? styles?.selected : "",
-        state.isHovered ? styles?.hover : ""
+        select ? styles?.selected : "",
+        hover ? styles?.hover : ""
       )}
       onMouseDown={onMouseDown}
-      onPointerOver={onOver}
-      onPointerOut={onOut}
+      onPointerOver={() => {
+        setHover(true);
+        if (onHoverRef.current) onHoverRef.current(true, value);
+      }}
+      onPointerOut={() => {
+        setHover(false);
+        if (onHoverRef.current) onHoverRef.current(false, value);
+      }}
     >
       {children ? children : label}
     </div>
