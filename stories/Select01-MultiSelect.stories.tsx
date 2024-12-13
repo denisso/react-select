@@ -75,7 +75,7 @@ const CustomButton = () => {
         tag={
           <Tag
             className={styles.tag}
-            button={<TagClose className={styles["tag-close"]} />}
+            button={<TagClose label={"X"} className={styles["tag-close"]} />}
           />
         }
       />
@@ -106,7 +106,10 @@ const CustomMenu = ({ options }: Props) => {
           value={"zero"}
           className={classNames(styles.option, styles.empty)}
         >
-          <ButtonCloseMulti label={"Close menu"} className={styles['button-close']}/>
+          <ButtonCloseMulti
+            label={"Close menu"}
+            className={styles["button-close"]}
+          />
         </Option>
         {options.map(({ label, value }) => (
           <Option
@@ -132,6 +135,7 @@ const CustomSelect = ({ options }: Props) => {
 };
 
 export default CustomSelect;
+
 
 // Usage
 <CustomSelect

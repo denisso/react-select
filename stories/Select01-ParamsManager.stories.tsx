@@ -42,9 +42,18 @@ export const Default: Story = {
     docs: {
       source: {
         code: `
+import Select, {
+  Menu,
+  Option,
+  Button,
+  ParamsManager,
+  State,
+} from "./Components/Select01";
+import styles from "./Select01.module.scss";
+
 const CustomButton = () => {
-  const onChange = (id: IDType) => {
-    console.log("CustomButton", id);
+  const onOpen = (open: State["open"]) => {
+    console.log("CustomButton onOpen", open);
   };
   return (
     <>
@@ -53,7 +62,7 @@ const CustomButton = () => {
         className={styles.button}
         styles={{ open: styles.open }}
       />
-      <ParamsManager onChange={onChange} />
+      <ParamsManager onOpen={onOpen} />
     </>
   );
 };
@@ -68,22 +77,23 @@ type Props = {
 };
 
 const CustomMenu = ({ options }: Props) => {
-  const onChange = (id: IDType) => {
-    console.log("CustomMenu", id);
+  const onOptions = (options: State["options"]) => {
+    console.log("CustomMenu onOptions", options);
   };
   return (
     <>
-      <ParamsManager onChange={onChange} />
+      <ParamsManager onOptions={onOptions} />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}
         portal={true}
-        styles={{ open: styles.open }}
+        styles={{ open: styles.open, }}
       >
         <Option
           label={"empty option"}
           value={"zero"}
           className={styles.option}
+          styles={{ selected: styles.selected, hover: styles.hover }}
         />
         {options.map(({ label, value }) => (
           <Option
@@ -91,7 +101,7 @@ const CustomMenu = ({ options }: Props) => {
             value={value}
             key={value}
             className={styles.option}
-            styles={{ selected: styles.selected }}
+            styles={{ selected: styles.selected, hover: styles.hover }}
           />
         ))}
       </Menu>
@@ -109,6 +119,7 @@ const CustomSelect = ({ options }: Props) => {
 };
 
 export default CustomSelect;
+
 
 // Usage
 <CustomSelect

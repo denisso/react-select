@@ -42,6 +42,9 @@ export const Default: Story = {
     docs: {
       source: {
         code: `
+import Select, { Menu, Option, Button } from "./Components/Select01";
+import styles from "./Select01.module.scss";
+
 const CustomButton = () => {
   return (
     <Button
@@ -89,6 +92,9 @@ const CustomSelect = ({ options }: Props) => {
     </Select>
   );
 };
+
+export default CustomSelect;
+
 // Usage
 <CustomSelect
   options={[
@@ -96,7 +102,6 @@ const CustomSelect = ({ options }: Props) => {
     { label: 'Option 2', value: 'value2' },
   ]}
 />
-
   `,
       },
     },
