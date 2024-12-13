@@ -30,9 +30,16 @@ export const ButtonCloseMulti = ({
 type ButtonProps = {
   className?: string;
   value?: string;
+  label?: string;
+  children?: React.ReactNode;
 };
 
-export const TagClose = ({ className, value }: ButtonProps) => {
+export const TagClose = ({
+  className,
+  value,
+  label,
+  children,
+}: ButtonProps) => {
   const c = useContext();
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -42,7 +49,7 @@ export const TagClose = ({ className, value }: ButtonProps) => {
 
   return (
     <button className={className} tabIndex={-1} onMouseDown={handleClick}>
-      X
+      {label ? label : children}
     </button>
   );
 };
@@ -97,10 +104,7 @@ const ButtonMulti = ({
       if (click.message == "outside") {
         c.sm.state(false).open = "close";
       } else if (click.message == "option") {
-        if (
-          click.value &&
-          click.value !== c.sm.config.emptyOption
-        ) {
+        if (click.value && click.value !== c.sm.config.emptyOption) {
           if (c.sm.state().options.has(click.value)) {
             c.sm.state().options.delete(click.value);
           } else {
