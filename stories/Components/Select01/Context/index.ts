@@ -1,5 +1,5 @@
 import React from "react";
-import type { SM } from "./Provider";
+import type { SM } from "./StateManager";
 
 interface IContext {
   boxRef: React.RefObject<HTMLDivElement>;

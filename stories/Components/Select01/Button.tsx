@@ -1,7 +1,7 @@
 import React from "react";
 import useContext from "./Context/useContext";
 import classNames from "classnames";
-import { State } from "./Context/Provider";
+import { State } from "./Context/StateManager";
 
 type ButtonLabel = {
   handleLabel?: (
@@ -17,12 +17,9 @@ export const ButtonLabel = ({ handleLabel, placeholder }: ButtonLabel) => {
   const c = useContext();
   const placeholderRef = React.useRef("");
   placeholderRef.current = !placeholder ? "empty" : placeholder;
-  const valueRef = React.useRef("");
   React.useEffect(() => {
     const changeOptions = (args: State["options"]) => {
-      valueRef.current = args.keys().next().value ?? "";
-      if (c.sm.config.emptyOption === valueRef.current)
-        return setLabel(placeholderRef.current);
+      if (!args.size) return setLabel(placeholderRef.current);
       const label = args.values().next().value;
       if (label) setLabel(label);
       else setLabel(placeholderRef.current);
@@ -38,7 +35,7 @@ export const ButtonLabel = ({ handleLabel, placeholder }: ButtonLabel) => {
   return <>{label}</>;
 };
 
-type Styles = Partial<{
+export type Styles = Partial<{
   open: string;
   focus: string;
 }>;
@@ -54,42 +51,57 @@ type Props = {
 const Button = ({ placeholder, className, children, box, styles }: Props) => {
   const c = useContext();
   const placeholderRef = React.useRef("empty");
-  const [label, setLabel] = React.useState("");
-  const [open, setOpen] = React.useState("");
   placeholderRef.current = !placeholder ? "empty" : placeholder;
-
+  const [label, setLabel] = React.useState(placeholderRef.current);
+  const [open, setOpen] = React.useState("");
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
-    const changeOptions = (args: State["options"]) => {
-      const value = args.keys().next().value;
-      if (c.sm.config.emptyOption === value)
-        return setLabel(placeholderRef.current);
-      const label = args.values().next().value;
-      if (label) setLabel(label);
+    c.sm.config.multiSelect = false;
+
+    if (box) c.controlRef.current = box;
+    else c.controlRef.current = buttonRef.current;
+
+    const onClick = (click: State["click"]) => {
+      if (!click) return;
+      if (click.message == "outside") {
+        c.sm.state().open = "close";
+      } else if (click.message == "option") {
+        if (click.value && click.label) {
+          c.sm.state(false).options.clear();
+          c.sm.state().options.set(click.value, click.label);
+          setLabel(
+            c.sm.config.emptyOption === click.value
+              ? placeholderRef.current
+              : click.label
+          );
+        }
+        c.sm.state().open = "close";
+      } else if (click.message == "button") {
+        c.sm.state().open =
+          c.sm.state(false).open === "open" ? "close" : "open";
+      }
+
+      setOpen(c.sm.state(false).open);
     };
-    const changeOpen = (open: State["open"]) => {
-      setOpen(open);
-    };
-    c.sm.attach("options", changeOptions);
-    c.sm.attach("open", changeOpen);
-    if (!label) setLabel(placeholderRef.current);
+
+    c.sm.attach("click", onClick);
     return () => {
-      c.sm.detach("options", changeOptions);
-      c.sm.detach("open", changeOpen);
+      c.sm.detach("click", onClick);
     };
   }, [c]);
 
   return (
     <button
       className={classNames(className, open === "open" ? styles?.open : "")}
-      onMouseDown={() => {
-        c.sm.state(true).click = "control";
-      }}
-      ref={(ref) => {
-        if (box) c.controlRef.current = box;
-        else if (ref) c.controlRef.current = ref;
-      }}
-      // onFocus={() => (c.sm.state.focus = true)}
-      // onBlur={() => (c.sm.state.focus = false)}
+      onMouseDown={() =>
+        (c.sm.state(true).click = {
+          message: "button",
+          element: buttonRef.current as HTMLElement,
+        })
+      }
+      ref={buttonRef}
+      onFocus={() => (c.sm.state().focus = true)}
+      onBlur={() => (c.sm.state().focus = false)}
     >
       {children ? children : label}
     </button>

@@ -1,6 +1,6 @@
 import React from "react";
 import useContext from "./Context/useContext";
-import { State } from "./Context/Provider";
+import { State } from "./Context/StateManager";
 
 export type Methods = Partial<{
   onOptions: (value: State["options"]) => void;

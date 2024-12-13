@@ -1,6 +1,7 @@
 import React from "react";
 import useContext from "./Context/useContext";
 import classNames from "classnames";
+import { State } from ".";
 
 type Styles = Partial<{
   hover: string;
@@ -9,7 +10,7 @@ type Styles = Partial<{
 
 type Props = {
   value: string;
-  label: string;
+  label?: string;
   className?: string;
   onSelect?: (state: boolean, value: string) => void;
   onHover?: (state: boolean, value: string) => void;
@@ -32,26 +33,34 @@ const Option = ({
   const [select, setSelect] = React.useState(false);
   const [hover, setHover] = React.useState(false);
   const onSelectRef = React.useRef(onSelect);
+  const optionRef = React.useRef<HTMLDivElement>(null);
   onSelectRef.current = onSelect;
   const onHoverRef = React.useRef(onHover);
   onHoverRef.current = onHover;
 
-  React.useEffect(() => {}, [c]);
+  React.useEffect(() => {
+    const onOption = function (options: State["options"]) {
+      console.log("onOption");
+      setSelect(options.has(value));
+    };
+    c.sm.attach("options", onOption);
+    setSelect(c.sm.state(false).options.has(value));
+    return () => {
+      c.sm.detach("options", onOption);
+    };
+  }, [c]);
 
-  if (!label || !value) return null;
+  if ((!label && !children) || !value) return null;
   const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     // handle onle left mouse
     if (e.button) return;
-
-    if (c.sm.config.multiSelect) {
-      c.sm.state().options.set(value, label);
-      c.sm.state().click = "control";
-    } else {
-      c.sm.state(false).options.clear();
-      c.sm.state().options.set(value, label);
-      c.sm.state().click = "control";
-    }
+    c.sm.state().click = {
+      message: "option",
+      value,
+      label,
+      element: optionRef.current as HTMLElement,
+    };
   };
 
   return (
@@ -59,6 +68,7 @@ const Option = ({
       {...attrs}
       role="option"
       aria-selected={select}
+      ref={optionRef}
       className={classNames(
         className,
         select ? styles?.selected : "",

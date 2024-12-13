@@ -1,24 +1,41 @@
+import React from "react";
 import Select, {
   Menu,
   Option,
-  Button,
+  ButtonMulti,
+  ButtonCloseMulti,
+  Tag,
+  TagClose,
   ParamsManager,
   State,
 } from "./Components/Select01";
+import classNames from "classnames";
 import styles from "./Select01.module.scss";
 
 const CustomButton = () => {
-  const onOpen = (open: State["open"]) => {
-    console.log("CustomButton onOpen", open);
+  const [empty, setEmpty] = React.useState(true);
+  const onOptions = (options: State["options"]) => {
+    setEmpty(options.has("zero") || !options.size);
+    console.log("CustomButton onOpen", options);
   };
   return (
     <>
-      <Button
+      <ButtonMulti
         placeholder="placeholder"
-        className={styles.button}
+        className={classNames(
+          styles.button,
+          styles["button-multi"],
+          empty ? styles.plcaholder : ""
+        )}
         styles={{ open: styles.open }}
+        tag={
+          <Tag
+            className={styles.tag}
+            button={<TagClose className={styles["tag-close"]} />}
+          />
+        }
       />
-      <ParamsManager onOpen={onOpen} />
+      <ParamsManager onOptions={onOptions} />
     </>
   );
 };
@@ -33,31 +50,27 @@ type Props = {
 };
 
 const CustomMenu = ({ options }: Props) => {
-  const onOptions = (options: State["options"]) => {
-    console.log("CustomMenu onOptions", options);
-  };
   return (
     <>
-      <ParamsManager onOptions={onOptions} />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}
         portal={true}
-        styles={{ open: styles.open, }}
+        styles={{ open: styles.open }}
       >
         <Option
-          label={"empty option"}
           value={"zero"}
-          className={styles.option}
-          styles={{ selected: styles.selected, hover: styles.hover }}
-        />
+          className={classNames(styles.option, styles.empty)}
+        >
+          <ButtonCloseMulti label={"Close menu"} className={styles['button-close']}/>
+        </Option>
         {options.map(({ label, value }) => (
           <Option
             label={label}
             value={value}
             key={value}
             className={styles.option}
-            styles={{ selected: styles.selected, hover: styles.hover }}
+            styles={{ selected: styles.selected }}
           />
         ))}
       </Menu>

@@ -1,7 +1,4 @@
-import Select from "./Components/Select01";
-import Menu from "./Components/Select01/Menu";
-import Option from "./Components/Select01/Option";
-import Button from "./Components/Select01/Button";
+import Select, { Menu, Option, Button } from "./Components/Select01";
 import styles from "./Select01.module.scss";
 
 const CustomButton = () => {

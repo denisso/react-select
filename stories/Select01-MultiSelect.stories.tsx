@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import Select01 from "./Select01-ParamsManager";
+import Select01 from "./Select01-MultiSelect";
 
 const meta: Meta<typeof Select01> = {
-  title: "Examples/Select01 - ParamsManager",
+  title: "Examples/Select01 - MultiSelect",
   component: Select01,
   parameters: {
     layout: "centered",
@@ -42,18 +42,44 @@ export const Default: Story = {
     docs: {
       source: {
         code: `
+import React from "react";
+import Select, {
+  Menu,
+  Option,
+  ButtonMulti,
+  ButtonCloseMulti,
+  Tag,
+  TagClose,
+  ParamsManager,
+  State,
+} from "./Components/Select01";
+import classNames from "classnames";
+import styles from "./Select01.module.scss";
+
 const CustomButton = () => {
-  const onChange = (id: IDType) => {
-    console.log("CustomButton", id);
+  const [empty, setEmpty] = React.useState(true);
+  const onOptions = (options: State["options"]) => {
+    setEmpty(options.has("zero") || !options.size);
+    console.log("CustomButton onOpen", options);
   };
   return (
     <>
-      <Button
+      <ButtonMulti
         placeholder="placeholder"
-        className={styles.button}
+        className={classNames(
+          styles.button,
+          styles["button-multi"],
+          empty ? styles.plcaholder : ""
+        )}
         styles={{ open: styles.open }}
+        tag={
+          <Tag
+            className={styles.tag}
+            button={<TagClose className={styles["tag-close"]} />}
+          />
+        }
       />
-      <ParamsManager onChange={onChange} />
+      <ParamsManager onOptions={onOptions} />
     </>
   );
 };
@@ -68,12 +94,8 @@ type Props = {
 };
 
 const CustomMenu = ({ options }: Props) => {
-  const onChange = (id: IDType) => {
-    console.log("CustomMenu", id);
-  };
   return (
     <>
-      <ParamsManager onChange={onChange} />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}
@@ -81,10 +103,11 @@ const CustomMenu = ({ options }: Props) => {
         styles={{ open: styles.open }}
       >
         <Option
-          label={"empty option"}
           value={"zero"}
-          className={styles.option}
-        />
+          className={classNames(styles.option, styles.empty)}
+        >
+          <ButtonCloseMulti label={"Close menu"} className={styles['button-close']}/>
+        </Option>
         {options.map(({ label, value }) => (
           <Option
             label={label}
@@ -117,7 +140,6 @@ export default CustomSelect;
     { label: 'Option 2', value: 'value2' },
   ]}
 />
-
 `,
       },
     },

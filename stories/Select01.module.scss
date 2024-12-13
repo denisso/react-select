@@ -1,6 +1,5 @@
 $fontSize: 1.2rem;
 $border: 1px solid gray;
-$radius: 0.5rem;
 $background: rgb(228, 228, 228);
 $background-open: rgb(209, 209, 209);
 $transition-time: 0.5s;
@@ -8,23 +7,35 @@ $transition-time: 0.5s;
 .select {
   width: 400px;
   display: flex;
-
+  user-select: none;
   .button {
     cursor: pointer;
     flex: 1;
     display: flex;
     border: $border;
-    border-radius: $radius;
     justify-content: center;
     align-items: center;
     height: 2.5rem;
     font-size: $fontSize;
     transition: background $transition-time linear;
     background-color: $background;
+    &.button-multi.plcaholder {
+      justify-content: center;
+      align-items: center;
+    }
+    &.button-multi {
+      flex-wrap: wrap;
+      justify-content: initial;
+      align-items: initial;
+      .tag {
+        padding: 0.3rem;
+        .tag-close {
+          padding: 0.3rem;
+        }
+      }
+    }
     &.open {
-      border-bottom: none;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
+      border-bottom-color: $background-open;
       background-color: $background-open;
     }
   }
@@ -34,14 +45,22 @@ $transition-time: 0.5s;
   position: fixed;
   transition: position 0.1s linear;
   border: $border;
-  border-radius: $radius;
   background-color: $background;
   &.open {
-    border-top: none;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    border-top-color: $background-open;
   }
   .option {
+    &.empty {
+      justify-content: initial;
+      align-items: initial;
+    }
+    .button-close {
+      flex: 1;
+      font-size: $fontSize;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
     cursor: pointer;
     height: 2.5rem;
     font-size: $fontSize;
@@ -50,7 +69,7 @@ $transition-time: 0.5s;
     align-items: center;
     position: relative;
     transition: background $transition-time linear;
-    &:hover,
+    &.hover,
     &.selected {
       background-color: $background-open;
     }

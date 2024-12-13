@@ -5,7 +5,7 @@ import throttle from "../utils/throttle";
 import { addHandler, delHandler } from "../utils/posChange";
 import classNames from "classnames";
 import css from "./Menu.module.css";
-import type { State } from "./Context/Provider";
+import type { State } from "./Context/StateManager";
 
 const updateBox = throttle<
   (
@@ -32,7 +32,7 @@ type Props = {
   className: string;
   children: React.ReactNode;
   emptyValue: string;
-  styles?: Partial<{ open: string; portal: string }>;
+  styles?: Partial<{ open: string }>;
   onOpen?: (focus: boolean) => void;
   manualOpenClose?: boolean;
   portal?: boolean;
@@ -54,18 +54,20 @@ const Menu = ({
   });
   const menuRef = React.useRef<HTMLDivElement>(null);
 
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      menuRef.current &&
-      c.boxRef.current &&
-      !menuRef.current.contains(event.target as Node) &&
-      !c.boxRef.current.contains(event.target as Node)
-    ) {
-      c.sm.state().click = "outside";
-    }
-  };
-
   React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        c.boxRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !c.boxRef.current.contains(event.target as Node)
+      ) {
+        c.sm.state().click = {
+          message: "outside",
+          element: menuRef.current as HTMLElement,
+        };
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -78,27 +80,18 @@ const Menu = ({
       throw Error("Target element not valid");
     }
     setOpen(c.sm.state(false).open);
-    const onClick = (click: State["click"]) => {
-
-      if (c.sm.state(false).open === "open") {
-        c.sm.state().open = "close";
-      } else {
-        c.sm.state().open = "open";
-      }
-
-      setOpen(c.sm.state(false).open);
-    };
-    c.sm.attach("click", onClick);
     const $target = c.boxRef.current;
+    const onOpen = (open: State["open"]) => setOpen(open);
 
     updateBox($target, setAttrs);
     const h = () => updateBox($target, setAttrs);
+    c.sm.attach("open", onOpen);
     addHandler("resize", h);
     addHandler("scroll", h);
     return () => {
+      c.sm.detach("open", onOpen);
       delHandler("resize", h);
       delHandler("scroll", h);
-      c.sm.detach("click", onClick);
     };
   }, [c]);
   c.sm.config.emptyOption = emptyValue;
