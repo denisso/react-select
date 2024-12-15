@@ -33,8 +33,7 @@ type Props = {
   children: React.ReactNode;
   emptyValue: string;
   styles?: Partial<{ open: string }>;
-  onOpen?: (focus: boolean) => void;
-  manualOpenClose?: boolean;
+  onOpen?: (focus: State["open"]) => void;
   portal?: boolean;
 };
 
@@ -46,6 +45,7 @@ const Menu = ({
   styles,
   emptyValue,
   portal = false,
+  onOpen,
 }: Props) => {
   const c = useContext();
   const [open, setOpen] = React.useState<State["open"]>("close");
@@ -81,19 +81,20 @@ const Menu = ({
     }
     setOpen(c.sm.state(false).open);
     const $target = c.boxRef.current;
-    const onOpen = (open: State["open"]) => setOpen(open);
-
     updateBox($target, setAttrs);
     const h = () => updateBox($target, setAttrs);
-    c.sm.attach("open", onOpen);
+
     addHandler("resize", h);
     addHandler("scroll", h);
     return () => {
-      c.sm.detach("open", onOpen);
       delHandler("resize", h);
       delHandler("scroll", h);
     };
   }, [c]);
+  React.useEffect(() => {
+    c.sm.attach("open", onOpen);
+    return () => c.sm.detach("open", onOpen);
+  }, [c, onOpen]);
   c.sm.config.emptyOption = emptyValue;
   if (!c.sm.state(false).open) return null;
   if (!portal)
