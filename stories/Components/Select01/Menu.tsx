@@ -27,6 +27,34 @@ const updateBox = throttle<
     ...aria,
   });
 }, 100);
+type HandleClickOutsideProps = {
+  menuRef: React.RefObject<HTMLDivElement>;
+};
+
+const HandleClickOutside = ({ menuRef }: HandleClickOutsideProps) => {
+  const c = useContext();
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        c.boxRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !c.boxRef.current.contains(event.target as Node)
+      ) {
+        c.sm.state().click = {
+          message: "outside",
+          element: menuRef.current as HTMLElement,
+        };
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [c]);
+  return null;
+};
 
 type Props = {
   className: string;
@@ -55,47 +83,33 @@ const Menu = ({
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        c.boxRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        !c.boxRef.current.contains(event.target as Node)
-      ) {
-        c.sm.state().click = {
-          message: "outside",
-          element: menuRef.current as HTMLElement,
-        };
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  React.useEffect(() => {
     if (!portal) return;
     if (!(c.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
     }
     setOpen(c.sm.state(false).open);
+
     const $target = c.boxRef.current;
     updateBox($target, setAttrs);
     const h = () => updateBox($target, setAttrs);
-
+    c.sm.attach("open", setOpen);
     addHandler("resize", h);
     addHandler("scroll", h);
     return () => {
+      c.sm.detach("open", setOpen);
+
       delHandler("resize", h);
       delHandler("scroll", h);
     };
   }, [c]);
+
   React.useEffect(() => {
     c.sm.attach("open", onOpen);
     return () => c.sm.detach("open", onOpen);
   }, [c, onOpen]);
+
   c.sm.config.emptyOption = emptyValue;
+
   if (!c.sm.state(false).open) return null;
   if (!portal)
     return (
@@ -104,23 +118,26 @@ const Menu = ({
       </div>
     );
   return (
-    <Portal>
-      {open === "open" ? (
-        <div
-          {...attrs}
-          ref={menuRef}
-          className={classNames(
-            css.portal,
-            open ? styles?.open : "",
-            className
-          )}
-        >
-          {children}
-        </div>
-      ) : (
-        <></>
-      )}
-    </Portal>
+    <>
+      <HandleClickOutside menuRef={menuRef} />
+      <Portal>
+        {open == "open" ? (
+          <div
+            {...attrs}
+            ref={menuRef}
+            className={classNames(
+              css.portal,
+              open ? styles?.open : "",
+              className
+            )}
+          >
+            {children}
+          </div>
+        ) : (
+          <></>
+        )}
+      </Portal>
+    </>
   );
 };
 

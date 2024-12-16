@@ -29,8 +29,12 @@ $transition-time: 0.5s;
       align-items: initial;
       .tag {
         padding: 0.3rem;
+        display: flex;
+        align-items: center;
         .tag-close {
-          padding: 0.3rem;
+          padding: 0.2rem 0.3rem;
+          border: 1px solid rgb(82, 82, 82);
+          margin-left: 0.3rem;
         }
       }
     }
@@ -51,14 +55,13 @@ $transition-time: 0.5s;
   }
   .option {
     &.empty {
-      justify-content: initial;
-      align-items: initial;
+      justify-content: center;
+      // align-items: initial;
     }
     .button-close {
       flex: 1;
       font-size: $fontSize;
-      border: none;
-      background: transparent;
+      text-align: center;
       cursor: pointer;
     }
     cursor: pointer;

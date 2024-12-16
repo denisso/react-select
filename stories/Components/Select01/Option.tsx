@@ -40,7 +40,6 @@ const Option = ({
 
   React.useEffect(() => {
     const onOption = function (options: State["options"]) {
-      console.log("onOption");
       setSelect(options.has(value));
     };
     c.sm.attach("options", onOption);
@@ -51,7 +50,7 @@ const Option = ({
   }, [c]);
 
   if ((!label && !children) || !value) return null;
-  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     // handle onle left mouse
     if (e.button) return;
@@ -74,7 +73,7 @@ const Option = ({
         select ? styles?.selected : "",
         hover ? styles?.hover : ""
       )}
-      onMouseDown={onMouseDown}
+      onPointerDown={onPointerDown}
       onPointerOver={() => {
         setHover(true);
         if (onHoverRef.current) onHoverRef.current(true, value);

@@ -15,15 +15,18 @@ export const ButtonCloseMulti = ({
   children,
 }: ButtonCloseMultiProps) => {
   const c = useContext();
-
+  const onClick = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.button) return;
+    c.sm.state().open = "close"
+  }
   return (
-    <button
+    <div
       className={className}
-      tabIndex={-1}
-      onMouseDown={() => (c.sm.state().open = "close")}
+      onPointerDown={onClick}
     >
       {label ? label : children}
-    </button>
+    </div>
   );
 };
 
@@ -41,16 +44,16 @@ export const TagClose = ({
   children,
 }: ButtonProps) => {
   const c = useContext();
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (value !== undefined) c.sm.state().options.delete(value);
   };
 
   return (
-    <button className={className} tabIndex={-1} onMouseDown={handleClick}>
+    <div className={className}  onPointerDown={handleClick}>
       {label ? label : children}
-    </button>
+    </div>
   );
 };
 
@@ -61,12 +64,12 @@ type TagProps = {
   value?: string;
 };
 export const Tag = ({ label, className, button, value }: TagProps) => {
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
   return (
-    <div className={className} onMouseDown={handleClick}>
+    <div className={className} onPointerDown={handleClick}>
       {label} {React.cloneElement(button, { value })}
     </div>
   );
@@ -131,7 +134,7 @@ const ButtonMulti = ({
   return (
     <button
       className={classNames(className, open === "open" ? styles?.open : "")}
-      onMouseDown={() =>
+      onPointerDown={() =>
         (c.sm.state(true).click = {
           message: "button",
           element: buttonRef.current as HTMLElement,

@@ -93,7 +93,7 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
   return (
     <button
       className={classNames(className, open === "open" ? styles?.open : "")}
-      onMouseDown={() =>
+      onPointerDown={() =>
         (c.sm.state(true).click = {
           message: "button",
           element: buttonRef.current as HTMLElement,
