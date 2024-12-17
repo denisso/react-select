@@ -15,18 +15,15 @@ export const ButtonCloseMulti = ({
   children,
 }: ButtonCloseMultiProps) => {
   const c = useContext();
-  const onClick = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (e.button) return;
-    c.sm.state().open = "close"
-  }
+
   return (
-    <div
+    <button
       className={className}
-      onPointerDown={onClick}
+      tabIndex={-1}
+      onMouseDown={() => (c.sm.state().open = false)}
     >
       {label ? label : children}
-    </div>
+    </button>
   );
 };
 
@@ -44,16 +41,16 @@ export const TagClose = ({
   children,
 }: ButtonProps) => {
   const c = useContext();
-  const handleClick = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (value !== undefined) c.sm.state().options.delete(value);
   };
 
   return (
-    <div className={className}  onPointerDown={handleClick}>
+    <button className={className} tabIndex={-1} onMouseDown={handleClick}>
       {label ? label : children}
-    </div>
+    </button>
   );
 };
 
@@ -64,12 +61,12 @@ type TagProps = {
   value?: string;
 };
 export const Tag = ({ label, className, button, value }: TagProps) => {
-  const handleClick = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
   return (
-    <div className={className} onPointerDown={handleClick}>
+    <div className={className} onMouseDown={handleClick}>
       {label} {React.cloneElement(button, { value })}
     </div>
   );
@@ -92,7 +89,7 @@ const ButtonMulti = ({
   const c = useContext();
   const placeholderRef = React.useRef("empty");
   const [tags, setTags] = React.useState<[string, string][]>([]);
-  const [open, setOpen] = React.useState("");
+  const [open, setOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   placeholderRef.current = !placeholder ? "empty" : placeholder;
 
@@ -103,9 +100,9 @@ const ButtonMulti = ({
     else c.controlRef.current = buttonRef.current;
 
     const onClick = (click: State["click"]) => {
-      if (!click) return;
+      if (!click || click.event.button) return;
       if (click.message == "outside") {
-        c.sm.state(false).open = "close";
+        c.sm.state(false).open = false;
       } else if (click.message == "option") {
         if (click.value && click.value !== c.sm.config.emptyOption) {
           if (c.sm.state().options.has(click.value)) {
@@ -115,8 +112,7 @@ const ButtonMulti = ({
           }
         }
       } else if (click.message == "button") {
-        c.sm.state().open =
-          c.sm.state(false).open === "open" ? "close" : "open";
+        c.sm.state().open = !c.sm.state(false).open;
       }
 
       setOpen(c.sm.state().open);
@@ -133,11 +129,11 @@ const ButtonMulti = ({
   }, [c]);
   return (
     <button
-      className={classNames(className, open === "open" ? styles?.open : "")}
-      onPointerDown={() =>
+      className={classNames(className, open ? styles?.open : "")}
+      onMouseDown={(event: React.MouseEvent) =>
         (c.sm.state(true).click = {
           message: "button",
-          element: buttonRef.current as HTMLElement,
+          event: event.nativeEvent,
         })
       }
       ref={buttonRef}

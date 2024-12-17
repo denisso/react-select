@@ -27,6 +27,9 @@ const updateBox = throttle<
     ...aria,
   });
 }, 100);
+
+const aria = { role: "listbox" };
+
 type HandleClickOutsideProps = {
   menuRef: React.RefObject<HTMLDivElement>;
 };
@@ -44,7 +47,7 @@ const HandleClickOutside = ({ menuRef }: HandleClickOutsideProps) => {
       ) {
         c.sm.state().click = {
           message: "outside",
-          element: menuRef.current as HTMLElement,
+          event,
         };
       }
     };
@@ -61,26 +64,35 @@ type Props = {
   children: React.ReactNode;
   emptyValue: string;
   styles?: Partial<{ open: string }>;
-  onOpen?: (focus: State["open"]) => void;
   portal?: boolean;
+  animate?: {
+    t: number;
+    fn?: "ease" | "ease-in" | "ease-out" | "ease-in-out" | "linear";
+  } | null;
+  onOpen?: (open: State["open"]) => void;
 };
-
-const aria = { role: "listbox" };
 
 const Menu = ({
   className,
   children,
   styles,
   emptyValue,
-  portal = false,
+  portal,
+  animate,
   onOpen,
 }: Props) => {
   const c = useContext();
-  const [open, setOpen] = React.useState<State["open"]>("close");
+  const [open, setOpen] = React.useState<State["open"]>(false);
   const [attrs, setAttrs] = React.useState<React.HTMLAttributes<HTMLElement>>({
     ...aria,
   });
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const boxRef = React.useRef<HTMLDivElement>(null);
+  const ca = React.useRef<Animation | null>();
+  React.useEffect(() => {
+    c.sm.attach("open", onOpen);
+    return () => c.sm.detach("open", onOpen);
+  }, [c, onOpen]);
 
   React.useEffect(() => {
     if (!portal) return;
@@ -88,50 +100,85 @@ const Menu = ({
       throw Error("Target element not valid");
     }
     setOpen(c.sm.state(false).open);
-
     const $target = c.boxRef.current;
     updateBox($target, setAttrs);
     const h = () => updateBox($target, setAttrs);
-    c.sm.attach("open", setOpen);
+
     addHandler("resize", h);
     addHandler("scroll", h);
+    c.sm.attach("open", setOpen);
     return () => {
-      c.sm.detach("open", setOpen);
-
       delHandler("resize", h);
       delHandler("scroll", h);
+      c.sm.detach("open", setOpen);
     };
   }, [c]);
 
   React.useEffect(() => {
+    // animation
+    const onOpen = (open: State["open"]) => {
+      if (!animate || boxRef.current === null || !boxRef.current.children[0])
+        return;
+
+      const w = boxRef.current.children[0] as HTMLDivElement;
+      const p = boxRef.current.offsetHeight / w.offsetHeight;
+      const duration = animate?.t ?? 500;
+
+      const a = boxRef.current.animate(
+        [
+          { height: p * w.offsetHeight + "px" },
+          { height: open ? w.offsetHeight + "px" : 0 },
+        ],
+        {
+          duration: open
+            ? duration - Math.min(duration, p * duration)
+            : Math.min(duration, p * duration),
+          iterations: 1,
+          fill: "forwards",
+          easing: animate.fn ?? "linear",
+        }
+      );
+      c.sm.state().animate = { target: "menu", state: "start" };
+      a.onfinish = () => {
+        c.sm.state().animate = { target: "menu", state: "finish" };
+        ca.current = null;
+      };
+
+      if (ca.current) ca.current.cancel();
+      ca.current = a;
+    };
     c.sm.attach("open", onOpen);
     return () => c.sm.detach("open", onOpen);
-  }, [c, onOpen]);
-
+  }, [c, animate]);
   c.sm.config.emptyOption = emptyValue;
 
-  if (!c.sm.state(false).open) return null;
   if (!portal)
     return (
       <div className={className} ref={menuRef}>
         {children}
       </div>
     );
+
   return (
     <>
       <HandleClickOutside menuRef={menuRef} />
       <Portal>
-        {open == "open" ? (
+        {animate || open ? (
           <div
             {...attrs}
-            ref={menuRef}
-            className={classNames(
-              css.portal,
-              open ? styles?.open : "",
-              className
-            )}
+            ref={boxRef}
+            className={classNames(css.box, animate ? css.animate : "")}
           >
-            {children}
+            <div
+              ref={menuRef}
+              className={classNames(
+                css.portal,
+                open ? styles?.open : "",
+                className
+              )}
+            >
+              {children}
+            </div>
           </div>
         ) : (
           <></>

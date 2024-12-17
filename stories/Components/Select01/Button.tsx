@@ -53,7 +53,7 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
   const placeholderRef = React.useRef("empty");
   placeholderRef.current = !placeholder ? "empty" : placeholder;
   const [label, setLabel] = React.useState(placeholderRef.current);
-  const [open, setOpen] = React.useState("");
+  const [open, setOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   React.useEffect(() => {
     c.sm.config.multiSelect = false;
@@ -62,9 +62,10 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
     else c.controlRef.current = buttonRef.current;
 
     const onClick = (click: State["click"]) => {
-      if (!click) return;
+      if (!click || click.event.button) return;
+
       if (click.message == "outside") {
-        c.sm.state().open = "close";
+        c.sm.state().open = false;
       } else if (click.message == "option") {
         if (click.value && click.label) {
           c.sm.state(false).options.clear();
@@ -75,10 +76,9 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
               : click.label
           );
         }
-        c.sm.state().open = "close";
+        c.sm.state().open = false;
       } else if (click.message == "button") {
-        c.sm.state().open =
-          c.sm.state(false).open === "open" ? "close" : "open";
+        c.sm.state().open = !c.sm.state().open;
       }
 
       setOpen(c.sm.state(false).open);
@@ -92,11 +92,11 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
 
   return (
     <button
-      className={classNames(className, open === "open" ? styles?.open : "")}
-      onPointerDown={() =>
+      className={classNames(className, open ? styles?.open : "")}
+      onMouseDown={(event: React.MouseEvent) =>
         (c.sm.state(true).click = {
           message: "button",
-          element: buttonRef.current as HTMLElement,
+          event: event.nativeEvent,
         })
       }
       ref={buttonRef}

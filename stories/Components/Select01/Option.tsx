@@ -33,13 +33,13 @@ const Option = ({
   const [select, setSelect] = React.useState(false);
   const [hover, setHover] = React.useState(false);
   const onSelectRef = React.useRef(onSelect);
-  const optionRef = React.useRef<HTMLDivElement>(null);
   onSelectRef.current = onSelect;
   const onHoverRef = React.useRef(onHover);
   onHoverRef.current = onHover;
 
   React.useEffect(() => {
     const onOption = function (options: State["options"]) {
+      console.log("onOption");
       setSelect(options.has(value));
     };
     c.sm.attach("options", onOption);
@@ -50,7 +50,7 @@ const Option = ({
   }, [c]);
 
   if ((!label && !children) || !value) return null;
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     // handle onle left mouse
     if (e.button) return;
@@ -58,7 +58,7 @@ const Option = ({
       message: "option",
       value,
       label,
-      element: optionRef.current as HTMLElement,
+      event: e.nativeEvent,
     };
   };
 
@@ -67,13 +67,12 @@ const Option = ({
       {...attrs}
       role="option"
       aria-selected={select}
-      ref={optionRef}
       className={classNames(
         className,
         select ? styles?.selected : "",
         hover ? styles?.hover : ""
       )}
-      onPointerDown={onPointerDown}
+      onMouseDown={onMouseDown}
       onPointerOver={() => {
         setHover(true);
         if (onHoverRef.current) onHoverRef.current(true, value);

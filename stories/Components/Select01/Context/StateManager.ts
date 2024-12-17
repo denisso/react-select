@@ -1,13 +1,14 @@
 type Click = {
   message: "button" | "option" | "outside";
-  element: HTMLElement;
+  event: MouseEvent;
   value?: string;
   label?: string;
 } | null;
 
 export type State = {
   options: Map<string, string>;
-  open: "open" | "inopen" | "close" | "inclose ";
+  open: boolean;
+  animate: { target: "menu"; state: "start" | "finish" } | null;
   focus: boolean;
   click: Click;
 };
@@ -19,16 +20,19 @@ export type SM = StateManager;
 export default class StateManager {
   private _state: State = {
     options: new Map<string, string>(),
-    open: "close",
+    open: false,
+    animate: null,
     focus: false,
     click: null,
   };
   private _observs = {
     options: new Set<ObserverCallback<"options">>(),
     open: new Set<ObserverCallback<"open">>(),
+    animate: new Set<ObserverCallback<"animate">>(),
     focus: new Set<ObserverCallback<"focus">>(),
     click: new Set<ObserverCallback<"click">>(),
   };
+
   public config = {
     emptyOption: "",
     // multiply selection
@@ -90,12 +94,12 @@ export default class StateManager {
   }
 
   attach<K extends keyof State>(state: K, cb?: ObserverCallback<K>) {
-    if(!cb) return
+    if (!cb) return;
     this._observs[state].add(cb as ObserverCallback<keyof State>);
   }
 
   detach<K extends keyof State>(state: K, cb?: ObserverCallback<K>) {
-    if(!cb) return
+    if (!cb) return;
     this._observs[state].delete(cb as ObserverCallback<keyof State>);
   }
 

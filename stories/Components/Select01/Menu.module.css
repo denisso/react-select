@@ -1,6 +1,15 @@
-.portal {
-  display: block;
-  z-index: var(--zindex-ddmenu);
-  box-sizing: border-box;
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  position: fixed;
   overflow: hidden;
+  &.animate{
+    height: 0;
+  }
+  .portal {
+    display: block;
+    z-index: var(--zindex-ddmenu);
+    box-sizing: border-box;
+  }
 }
