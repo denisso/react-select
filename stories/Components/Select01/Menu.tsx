@@ -95,18 +95,19 @@ const Menu = ({
   }, [c, onOpen]);
 
   React.useEffect(() => {
-    if (!portal) return;
+    c.sm.attach("open", setOpen);
+    setOpen(c.sm.state(false).open);
+    if (!portal) return () => c.sm.detach("open", setOpen);
     if (!(c.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
     }
-    setOpen(c.sm.state(false).open);
     const $target = c.boxRef.current;
     updateBox($target, setAttrs);
     const h = () => updateBox($target, setAttrs);
 
     addHandler("resize", h);
     addHandler("scroll", h);
-    c.sm.attach("open", setOpen);
+
     return () => {
       delHandler("resize", h);
       delHandler("scroll", h);
@@ -154,9 +155,18 @@ const Menu = ({
 
   if (!portal)
     return (
-      <div className={className} ref={menuRef}>
-        {children}
-      </div>
+      <>
+        {open ? (
+          <div
+            className={classNames(className, open ? styles?.open : "")}
+            ref={menuRef}
+          >
+            {children}
+          </div>
+        ) : (
+          <></>
+        )}
+      </>
     );
 
   return (

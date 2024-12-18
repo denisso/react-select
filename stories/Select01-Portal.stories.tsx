@@ -17,6 +17,11 @@ const meta: Meta<typeof Select01> = {
         { label: "Option 2", value: "value2" },
       ],
     },
+    portal: {
+      control: { type: 'boolean' },
+      description: 'Toggle portal',
+      defaultValue: false,
+    },
   },
 };
 
@@ -30,6 +35,7 @@ export const Default: Story = {
       { label: "Option 1", value: "value1" },
       { label: "Option 2", value: "value2" },
     ],
+    portal: false
   },
   decorators: [
     (Story) => (

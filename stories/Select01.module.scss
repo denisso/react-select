@@ -8,6 +8,7 @@ $transition-time: 0.5s;
   width: 400px;
   display: flex;
   user-select: none;
+  flex-direction: column;
   .button {
     cursor: pointer;
     flex: 1;
@@ -15,7 +16,7 @@ $transition-time: 0.5s;
     border: $border;
     justify-content: center;
     align-items: center;
-    height: 2.5rem;
+    min-height: 2.5rem;
     font-size: $fontSize;
     transition: background $transition-time linear;
     background-color: $background;

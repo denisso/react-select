@@ -18,16 +18,17 @@ type OptionType = {
 
 type Props = {
   options: OptionType[];
+  portal: boolean;
 };
 
-const CustomSelect = ({ options }: Props) => {
+const CustomSelect = ({ options, portal }: Props) => {
   return (
     <Select className={styles.select}>
       <CustomButton />
       <Menu
         className={styles.menu}
         emptyValue={"zero"}
-        portal={true}
+        portal={portal}
         styles={{ open: styles.open }}
       >
         <Option
