@@ -40,12 +40,35 @@ export default class StateManager {
   };
   private _proxy: State | null = null;
   private _notify: boolean[] = [];
-  state(notify = true) {
-    this._notify.push(notify);
-    const self = this;
-    if (this._proxy) return this._proxy;
 
-    const optionsProxy = new Proxy(this._state.options, {
+  constructor() {
+    const self = this;
+    const ConstructorProxy = function <T extends { [key: string]: unknown }>(
+      target: Partial<T>,
+      opt?: Partial<T>
+    ) {
+      return new Proxy(target, {
+        get(target, prop, receiver) {
+          if (opt && opt[prop as string]) {
+            return opt[prop as string];
+          } else {
+            if (self._notify.pop()) {
+              self._notifyFn(prop as keyof State);
+            }
+          }
+          return Reflect.get(target, prop, receiver);
+        },
+        set(target, prop, value, receiver) {
+          const result = Reflect.set(target, prop, value, receiver);
+          if (self._notify.pop()) {
+            self._notifyFn(prop as keyof State);
+          }
+
+          return result;
+        },
+      });
+    };
+    const options = new Proxy(this._state.options, {
       get(target, prop, receiver) {
         if (typeof target[prop as keyof Map<string, string>] === "function") {
           if (["delete", "set", "clear"].includes(prop as string)) {
@@ -68,28 +91,13 @@ export default class StateManager {
         return Reflect.get(target, prop, receiver);
       },
     });
+    this._proxy = ConstructorProxy(this._state, {
+      options,
+    }) as State;
+  }
 
-    this._proxy = new Proxy(self._state, {
-      get(target, prop, receiver) {
-        if (prop === "options") {
-          return optionsProxy;
-        } else {
-          if (self._notify.pop()) {
-            self._notifyFn(prop as keyof State);
-          }
-        }
-        return Reflect.get(target, prop, receiver);
-      },
-      set(target, prop, value, receiver) {
-        const result = Reflect.set(target, prop, value, receiver);
-        if (self._notify.pop()) {
-          self._notifyFn(prop as keyof State);
-        }
-
-        return result;
-      },
-    });
-
+  state(notify = true) {
+    this._notify.push(notify);
     return this._proxy;
   }
 
