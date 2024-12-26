@@ -5,7 +5,7 @@ type Click = {
   label?: string;
 } | null;
 
-export type State = {
+export type StatePublic = {
   options: Map<string, string>;
   open: boolean;
   animate: { target: "menu"; state: "start" | "finish" } | null;
@@ -13,61 +13,72 @@ export type State = {
   click: Click;
 };
 
-type ObserverCallback<K extends keyof State> = (arg: State[K]) => void;
+type ObserverCallback<T, K extends keyof T> = (arg: T[K]) => void;
 
-export type SM = StateManager;
+abstract class StateInstance<T extends {}> {
+  protected _state: T;
+  protected abstract state: T;
+  protected _observs: { [K in keyof T]: Set<ObserverCallback<T, K>> };
 
-export default class StateManager {
-  private _state: State = {
-    options: new Map<string, string>(),
-    open: false,
-    animate: null,
-    focus: false,
-    click: null,
-  };
-  private _observs = {
-    options: new Set<ObserverCallback<"options">>(),
-    open: new Set<ObserverCallback<"open">>(),
-    animate: new Set<ObserverCallback<"animate">>(),
-    focus: new Set<ObserverCallback<"focus">>(),
-    click: new Set<ObserverCallback<"click">>(),
-  };
+  constructor(state: T) {
+    this._state = state;
+    this._observs = this._initObservers();
+  }
 
+  attach<K extends keyof T>(key: K, cb?: ObserverCallback<T, K>) {
+    if (!cb) return;
+    this._observs[key].add(cb);
+  }
+
+  detach<K extends keyof T>(key: K, cb?: ObserverCallback<T, K>) {
+    if (!cb) return;
+    this._observs[key].delete(cb);
+  }
+
+  private _initObservers(): { [K in keyof T]: Set<ObserverCallback<T, K>> } {
+    const observs: Partial<{ [K in keyof T]: Set<ObserverCallback<T, K>> }> =
+      {};
+    for (const key of Object.keys(this._state) as (keyof T)[]) {
+      observs[key] = new Set<ObserverCallback<T, typeof key>>();
+    }
+    return observs as { [K in keyof T]: Set<ObserverCallback<T, K>> };
+  }
+
+  protected _notifyFn<K extends keyof T>(key: K) {
+    for (const cb of this._observs[key]) {
+      cb(this._state[key]);
+    }
+  }
+
+  protected _initProxy(opt?: Partial<T>) {
+    const self = this;
+    return new Proxy(this._state, {
+      get(target, prop, receiver) {
+        if (opt && opt[prop as keyof T]) {
+          return opt[prop as keyof T];
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+      set(target, prop, value, receiver) {
+        const result = Reflect.set(target, prop, value, receiver);
+        self._notifyFn(prop as keyof T);
+        return result;
+      },
+    });
+  }
+}
+
+export default class StateInstancePublic extends StateInstance<StatePublic> {
+  public state: StatePublic;
   public config = {
     emptyOption: "",
     // multiply selection
     multiSelect: false,
   };
-  private _proxy: State | null = null;
-  private _notify: boolean[] = [];
-
-  constructor() {
+  constructor(state: StatePublic) {
+    super(state);
     const self = this;
-    const ConstructorProxy = function <T extends { [key: string]: unknown }>(
-      target: Partial<T>,
-      opt?: Partial<T>
-    ) {
-      return new Proxy(target, {
-        get(target, prop, receiver) {
-          if (opt && opt[prop as string]) {
-            return opt[prop as string];
-          } else {
-            if (self._notify.pop()) {
-              self._notifyFn(prop as keyof State);
-            }
-          }
-          return Reflect.get(target, prop, receiver);
-        },
-        set(target, prop, value, receiver) {
-          const result = Reflect.set(target, prop, value, receiver);
-          if (self._notify.pop()) {
-            self._notifyFn(prop as keyof State);
-          }
 
-          return result;
-        },
-      });
-    };
     const options = new Proxy(this._state.options, {
       get(target, prop, receiver) {
         if (typeof target[prop as keyof Map<string, string>] === "function") {
@@ -77,43 +88,20 @@ export default class StateManager {
                 target,
                 args
               );
-              if (self._notify.pop()) {
-                self._notifyFn("options");
-              }
+
+              self._notifyFn("options");
+
               return result;
             };
           }
           return Reflect.get(target, prop, receiver).bind(target);
         }
-        if (self._notify.pop()) {
-          self._notifyFn("options");
-        }
+
+        self._notifyFn("options");
+
         return Reflect.get(target, prop, receiver);
       },
     });
-    this._proxy = ConstructorProxy(this._state, {
-      options,
-    }) as State;
-  }
-
-  state(notify = true) {
-    this._notify.push(notify);
-    return this._proxy;
-  }
-
-  attach<K extends keyof State>(state: K, cb?: ObserverCallback<K>) {
-    if (!cb) return;
-    this._observs[state].add(cb as ObserverCallback<keyof State>);
-  }
-
-  detach<K extends keyof State>(state: K, cb?: ObserverCallback<K>) {
-    if (!cb) return;
-    this._observs[state].delete(cb as ObserverCallback<keyof State>);
-  }
-
-  private _notifyFn<K extends keyof State>(state: K) {
-    for (const cb of this._observs[state]) {
-      (cb as ObserverCallback<K>)(this._state[state]);
-    }
+    this.state = this._initProxy({ options });
   }
 }

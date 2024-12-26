@@ -9,7 +9,13 @@ export function useConstructSM() {
   const ref = React.useRef<StateManager | null>(null);
 
   if (ref.current === null) {
-    ref.current = new StateManager();
+    ref.current = new StateManager({
+      options: new Map<string, string>(),
+      open: false,
+      animate: null,
+      focus: false,
+      click: null,
+    });
   }
 
   return ref.current;

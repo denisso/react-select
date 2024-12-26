@@ -1,7 +1,7 @@
 import React from "react";
-import useContext from "./Context/useContext";
-import { State } from "./Context/StateManager";
-import type { Styles } from "./Button";
+import useContext from "../Context/useContext";
+import { State } from "..";
+import type { Styles } from "./Click";
 import classNames from "classnames";
 
 type ButtonCloseMultiProps = {
@@ -20,7 +20,7 @@ export const ButtonCloseMulti = ({
     <button
       className={className}
       tabIndex={-1}
-      onMouseDown={() => (c.sm.state().open = false)}
+      onMouseDown={() => (c.sm.state.open = false)}
     >
       {label ? label : children}
     </button>
@@ -44,7 +44,7 @@ export const TagClose = ({
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (value !== undefined) c.sm.state().options.delete(value);
+    if (value !== undefined) c.sm.state.options.delete(value);
   };
 
   return (
@@ -102,20 +102,20 @@ const ButtonMulti = ({
     const onClick = (click: State["click"]) => {
       if (!click || click.event.button) return;
       if (click.message == "outside") {
-        c.sm.state(false).open = false;
+        c.sm.state.open = false;
       } else if (click.message == "option") {
         if (click.value && click.value !== c.sm.config.emptyOption) {
-          if (c.sm.state().options.has(click.value)) {
-            c.sm.state().options.delete(click.value);
+          if (c.sm.state.options.has(click.value)) {
+            c.sm.state.options.delete(click.value);
           } else {
-            c.sm.state().options.set(click.value, click.label ?? "");
+            c.sm.state.options.set(click.value, click.label ?? "");
           }
         }
       } else if (click.message == "button") {
-        c.sm.state().open = !c.sm.state(false).open;
+        c.sm.state.open = !c.sm.state.open;
       }
 
-      setOpen(c.sm.state().open);
+      setOpen(c.sm.state.open);
     };
     const onOptions = (options: State["options"]) => {
       setTags(Array.from(options));
@@ -131,14 +131,14 @@ const ButtonMulti = ({
     <button
       className={classNames(className, open ? styles?.open : "")}
       onMouseDown={(event: React.MouseEvent) =>
-        (c.sm.state(true).click = {
+        (c.sm.state.click = {
           message: "button",
           event: event.nativeEvent,
         })
       }
       ref={buttonRef}
-      onFocus={() => (c.sm.state().focus = true)}
-      onBlur={() => (c.sm.state().focus = false)}
+      onFocus={() => (c.sm.state.focus = true)}
+      onBlur={() => (c.sm.state.focus = false)}
     >
       {tags.length
         ? tags.map(([key, label]) =>

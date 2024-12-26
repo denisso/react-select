@@ -5,7 +5,7 @@ import throttle from "../utils/throttle";
 import { addHandler, delHandler } from "../utils/posChange";
 import classNames from "classnames";
 import css from "./Menu.module.css";
-import type { State } from "./Context/StateManager";
+import type { State } from ".";
 
 const updateBox = throttle<
   (
@@ -45,7 +45,7 @@ const HandleClickOutside = ({ menuRef }: HandleClickOutsideProps) => {
         !menuRef.current.contains(event.target as Node) &&
         !c.boxRef.current.contains(event.target as Node)
       ) {
-        c.sm.state().click = {
+        c.sm.state.click = {
           message: "outside",
           event,
         };
@@ -96,7 +96,7 @@ const Menu = ({
 
   React.useEffect(() => {
     c.sm.attach("open", setOpen);
-    setOpen(c.sm.state(false).open);
+    setOpen(c.sm.state.open);
     if (!portal) return () => c.sm.detach("open", setOpen);
     if (!(c.boxRef.current instanceof HTMLElement)) {
       throw Error("Target element not valid");
@@ -139,9 +139,9 @@ const Menu = ({
           easing: animate.fn ?? "linear",
         }
       );
-      c.sm.state().animate = { target: "menu", state: "start" };
+      c.sm.state.animate = { target: "menu", state: "start" };
       a.onfinish = () => {
-        c.sm.state().animate = { target: "menu", state: "finish" };
+        c.sm.state.animate = { target: "menu", state: "finish" };
         ca.current = null;
       };
 

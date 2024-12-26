@@ -7,14 +7,14 @@
 import React from "react";
 import ContextProvider from "./Context/Provider";
 import useContext from "./Context/useContext";
-export type { State } from "./Context/StateManager";
-export { default as Button } from "./Button";
+export type { StatePublic as State } from "./Context/StateManager";
+export { default as Button } from "./Button/Click";
 export {
   default as ButtonMulti,
   Tag,
   TagClose,
   ButtonCloseMulti,
-} from "./ButtonMulti";
+} from "./Button/MultiSelect";
 export { default as Menu } from "./Menu";
 export { default as Option } from "./Option";
 export { default as ParamsManager } from "./ParamsManager";

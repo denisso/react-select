@@ -43,7 +43,7 @@ const Option = ({
       setSelect(options.has(value));
     };
     c.sm.attach("options", onOption);
-    setSelect(c.sm.state(false).options.has(value));
+    setSelect(c.sm.state.options.has(value));
     return () => {
       c.sm.detach("options", onOption);
     };
@@ -54,7 +54,7 @@ const Option = ({
     e.preventDefault();
     // handle onle left mouse
     if (e.button) return;
-    c.sm.state().click = {
+    c.sm.state.click = {
       message: "option",
       value,
       label,

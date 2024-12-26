@@ -1,7 +1,7 @@
 import React from "react";
-import useContext from "./Context/useContext";
+import useContext from "../Context/useContext";
 import classNames from "classnames";
-import { State } from "./Context/StateManager";
+import { State } from "../";
 
 type ButtonLabel = {
   handleLabel?: (
@@ -65,23 +65,23 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
       if (!click || click.event.button) return;
 
       if (click.message == "outside") {
-        c.sm.state().open = false;
+        c.sm.state.open = false;
       } else if (click.message == "option") {
         if (click.value && click.label) {
-          c.sm.state(false).options.clear();
-          c.sm.state().options.set(click.value, click.label);
+          c.sm.state.options.clear();
+          c.sm.state.options.set(click.value, click.label);
           setLabel(
             c.sm.config.emptyOption === click.value
               ? placeholderRef.current
               : click.label
           );
         }
-        c.sm.state().open = false;
+        c.sm.state.open = false;
       } else if (click.message == "button") {
-        c.sm.state().open = !c.sm.state().open;
+        c.sm.state.open = !c.sm.state.open;
       }
 
-      setOpen(c.sm.state(false).open);
+      setOpen(c.sm.state.open);
     };
 
     c.sm.attach("click", onClick);
@@ -94,14 +94,14 @@ const Button = ({ placeholder, className, children, box, styles }: Props) => {
     <button
       className={classNames(className, open ? styles?.open : "")}
       onMouseDown={(event: React.MouseEvent) =>
-        (c.sm.state(true).click = {
+        (c.sm.state.click = {
           message: "button",
           event: event.nativeEvent,
         })
       }
       ref={buttonRef}
-      onFocus={() => (c.sm.state().focus = true)}
-      onBlur={() => (c.sm.state().focus = false)}
+      onFocus={() => (c.sm.state.focus = true)}
+      onBlur={() => (c.sm.state.focus = false)}
     >
       {children ? children : label}
     </button>
