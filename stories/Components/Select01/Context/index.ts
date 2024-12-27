@@ -1,10 +1,10 @@
 import React from "react";
-import type { SM } from "./StateManager";
+import type StateManagerPublic from "./StateManager";
 
 interface IContext {
   boxRef: React.RefObject<HTMLDivElement>;
   controlRef: React.MutableRefObject<HTMLElement | null>;
-  sm: SM;
+  sm: StateManagerPublic;
 }
 
 export default React.createContext<IContext | undefined>(undefined);

@@ -15,7 +15,7 @@ export type StatePublic = {
 
 type ObserverCallback<T, K extends keyof T> = (arg: T[K]) => void;
 
-abstract class StateInstance<T extends {}> {
+abstract class StateManager<T extends {}> {
   protected _state: T;
   protected abstract state: T;
   protected _observs: { [K in keyof T]: Set<ObserverCallback<T, K>> };
@@ -68,7 +68,7 @@ abstract class StateInstance<T extends {}> {
   }
 }
 
-export default class StateInstancePublic extends StateInstance<StatePublic> {
+export default class StateManagerPublic extends StateManager<StatePublic> {
   public state: StatePublic;
   public config = {
     emptyOption: "",
