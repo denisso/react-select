@@ -15,7 +15,7 @@ export type StatePublic = {
 
 type ObserverCallback<T, K extends keyof T> = (arg: T[K]) => void;
 
-abstract class StateManager<T extends {}> {
+abstract class StateManager<T extends object> {
   protected _state: T;
   protected abstract state: T;
   protected _observs: { [K in keyof T]: Set<ObserverCallback<T, K>> };
@@ -50,18 +50,39 @@ abstract class StateManager<T extends {}> {
     }
   }
 
-  protected _initProxy(opt?: Partial<T>) {
-    const self = this;
-    return new Proxy(this._state, {
-      get(target, prop, receiver) {
-        if (opt && opt[prop as keyof T]) {
-          return opt[prop as keyof T];
+  protected _buildProxy<K extends keyof T>(
+    key?: K | null,
+    methods?: (keyof T[K])[] | null,
+    childrens?: Partial<T> | null
+  ) {
+    const state = !key ? this._state : this._state[key];
+    return new Proxy(state as object, {
+      get: (target, prop, receiver) => {
+        if (childrens && childrens[prop as keyof T]) {
+          return childrens[prop as keyof T];
+        }
+        if (
+          key &&
+          methods &&
+          typeof (target as T)[prop as keyof T] === "function"
+        ) {
+          if (methods.includes(prop as keyof T[K])) {
+            return (...args: string[]) => {
+              const result = Reflect.get(target, prop, receiver).apply(
+                target,
+                args
+              );
+              this._notifyFn(key);
+              return result;
+            };
+          }
+          return Reflect.get(target, prop, receiver).bind(target);
         }
         return Reflect.get(target, prop, receiver);
       },
-      set(target, prop, value, receiver) {
+      set: (target, prop, value, receiver) => {
         const result = Reflect.set(target, prop, value, receiver);
-        self._notifyFn(prop as keyof T);
+        this._notifyFn(prop as keyof T);
         return result;
       },
     });
@@ -77,31 +98,24 @@ export default class StateManagerPublic extends StateManager<StatePublic> {
   };
   constructor(state: StatePublic) {
     super(state);
-    const self = this;
 
-    const options = new Proxy(this._state.options, {
-      get(target, prop, receiver) {
-        if (typeof target[prop as keyof Map<string, string>] === "function") {
-          if (["delete", "set", "clear"].includes(prop as string)) {
-            return function (...args: string[]) {
-              const result = Reflect.get(target, prop, receiver).apply(
-                target,
-                args
-              );
+    const options = this._buildProxy("options", [
+      "delete",
+      "set",
+      "clear",
+    ]) as StatePublic["options"];
+    this.state = this._buildProxy(null, null, { options }) as StatePublic;
+  }
+}
 
-              self._notifyFn("options");
+export type StatePrivate = {
+  targetMenu: HTMLElement;
+};
 
-              return result;
-            };
-          }
-          return Reflect.get(target, prop, receiver).bind(target);
-        }
-
-        self._notifyFn("options");
-
-        return Reflect.get(target, prop, receiver);
-      },
-    });
-    this.state = this._initProxy({ options });
+export class StateManagerPrivate extends StateManager<StatePrivate> {
+  public state: StatePrivate;
+  constructor(state: StatePrivate) {
+    super(state);
+    this.state = this._buildProxy() as StatePrivate;
   }
 }
