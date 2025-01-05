@@ -45,9 +45,9 @@ abstract class StateManager<T extends object> {
   }
 
   protected _notifyFn<K extends keyof T>(key: K) {
-    for (const cb of this._observs[key]) {
-      cb(this._state[key]);
-    }
+    // value variable - important for recursive update states
+    const value = this._state[key];
+    for (const cb of this._observs[key]) cb(value);
   }
 
   protected _buildProxy<K extends keyof T>(
