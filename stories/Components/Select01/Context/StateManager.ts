@@ -53,13 +53,13 @@ abstract class StateManager<T extends object> {
   protected _buildProxy<K extends keyof T>(
     key?: K | null,
     methods?: (keyof T[K])[] | null,
-    childrens?: Partial<T> | null
+    children?: Partial<T> | null
   ) {
     const state = !key ? this._state : this._state[key];
     return new Proxy(state as object, {
       get: (target, prop, receiver) => {
-        if (childrens && childrens[prop as keyof T]) {
-          return childrens[prop as keyof T];
+        if (children && children[prop as keyof T]) {
+          return children[prop as keyof T];
         }
         if (
           key &&
