@@ -1,51 +1,107 @@
-# Example app with Storybook
+# Fully customizable react select control
+A highly flexible and customizable React select component, supporting multiselect functionality, animations, and an optional portal for menu options.
 
-This example shows a default set up of Storybook using [`@storybook/nextjs`](https://www.npmjs.com/package/@storybook/nextjs). Included in this example are stories that demonstrate the ability to use Next.js features in Storybook.
+The demo storybook is available at the [select-md.vercel.app](https://select-md.vercel.app/)
 
-### TypeScript
+**Features**:
+-  **Multiselect**: Allows selecting multiple options.
+-  **Animation**: Smooth transitions for menu interactions.
+-  **Optional Portal**: Menu options can be rendered outside of the DOM hierarchy, improving UI performance.
+  
+# Example code:
 
-As of v6.0, Storybook has built-in TypeScript support, so no configuration is needed. If you want to customize the default configuration, refer to the [TypeScript docs](https://storybook.js.org/docs/react/configure/typescript).
+```javascript
+import React from "react";
+import Select, {
+  Menu,
+  Option,
+  ButtonMulti,
+  ButtonCloseMulti,
+  Tag,
+  TagClose,
+  ParamsManager,
+  State,
+} from "./Components/Select01";
+import classNames from "classnames";
+import styles from "./Select01.module.scss";
 
-## Deploy your own
+const CustomButton = () => {
+  const [empty, setEmpty] = React.useState(true);
+  const onOptions = (options: State["options"]) => {
+    setEmpty(options.has("zero") || !options.size);
+    console.log("CustomButton onOpen", options);
+  };
+  return (
+    <>
+      <ButtonMulti
+        placeholder="placeholder"
+        className={classNames(
+          styles.button,
+          styles["button-multi"],
+          empty ? styles.plcaholder : ""
+        )}
+        styles={{ open: styles.open }}
+        tag={
+          <Tag
+            className={styles.tag}
+            button={<TagClose label={"X"} className={styles["tag-close"]} />}
+          />
+        }
+      />
+      <ParamsManager onOptions={onOptions} />
+    </>
+  );
+};
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-storybook)
+type OptionType = {
+  label: string;
+  value: string;
+};
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-storybook&project-name=with-storybook&repository-name=with-storybook)
+type Props = {
+  options: OptionType[];
+};
 
-## How to use
+const CustomMenu = ({ options }: Props) => {
+  return (
+    <>
+      <Menu
+        className={styles.menu}
+        emptyValue={"zero"}
+        portal={true}
+        styles={{ open: styles.open }}
+      >
+        <Option
+          value={"zero"}
+          className={classNames(styles.option, styles.empty)}
+        >
+          <ButtonCloseMulti
+            label={"Close menu"}
+            className={styles["button-close"]}
+          />
+        </Option>
+        {options.map(({ label, value }) => (
+          <Option
+            label={label}
+            value={value}
+            key={value}
+            className={styles.option}
+            styles={{ selected: styles.selected }}
+          />
+        ))}
+      </Menu>
+    </>
+  );
+};
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+const CustomSelect = ({ options }: Props) => {
+  return (
+    <Select className={styles.select}>
+      <CustomButton />
+      <CustomMenu options={options} />
+    </Select>
+  );
+};
 
-```bash
-npx create-next-app --example with-storybook with-storybook-app
+export default CustomSelect;
 ```
-
-```bash
-yarn create next-app --example with-storybook with-storybook-app
-```
-
-```bash
-pnpm create next-app --example with-storybook with-storybook-app
-```
-
-### Run Storybook
-
-```bash
-npm run storybook
-# or
-yarn storybook
-# or
-pnpm storybook
-```
-
-### Build Static Storybook
-
-```bash
-npm run build-storybook
-# or
-yarn build-storybook
-# or
-pnpm build-storybook
-```
-
-You can use [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) to deploy Storybook. Specify `storybook-static` as the output directory.
